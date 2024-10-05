@@ -136,7 +136,8 @@ const drawPolygon = () => {
 
     map.value.setCenter(center);
     map.value.setZoom(12);
-}
+    }
+)};
 
 
 onMounted(() => {
