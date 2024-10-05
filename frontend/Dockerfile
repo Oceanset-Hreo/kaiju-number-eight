@@ -1,18 +1,11 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /
-# copy both 'package.json' and 'package-lock.json' (if available)
-COPY package*.json .
 
-# install bash to attch
-RUN apk update && apk add bash
+COPY package.json ./
 
-RUN apk update && apk add curl
-
-# install project dependencies
 RUN npm install
 
-ENV PATH="$PATH:/node_modules/.bin"
+COPY . .
 
-# make the 'app' folder the current working directory
 WORKDIR /app
