@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -10,6 +11,15 @@ class Base(DeclarativeBase):
 
 
 app = Flask(__name__)
+
+CORS(
+    app,
+    resources={
+        r"/.*": {
+            "origins": ["http://0.0.0.0", "http://localhost", "http://www.jakdf.us"]
+        }
+    },
+)
 
 db = SQLAlchemy(model_class=Base)
 

@@ -1,0 +1,55 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+    networks:
+      - nasa_nework
+    command: ["npm", "run", "dev"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend:/app
+    networks:
+      - nasa_nework
+    command: ["gunicorn", "-c", "./gunicorn/gunicorn.config.py", "wsgi:app"]
+
+  nginx:
+    extends:
+      file: ./nginx/service.prod.yml
+      service: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - nasa_nework
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./nginx/certbot/www/:/var/www/certbot/:rw
+      - ./nginx/certbot/conf/:/etc/letsencrypt/:rw
+    command:
+      [
+        "sh",
+        "-c",
+        "certbot certonly --webroot --webroot-path /var/www/certbot/ -d jakdf.us --text --agree-tos --email jakdf@jakdf.com --rsa-key-size 4096 --verbose --keep-until-expiring --preferred-challenges=http",
+      ]
+    entrypoint: [""]
+    environment:
+      - TERM=xterm
+networks:
+  nasa_nework:
+    name: nasa_nework

@@ -1,4 +1,4 @@
-FROM python:3.11 AS base
+FROM python:3.12-slim AS base
 
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
@@ -6,26 +6,29 @@ ENV PYTHONFAULTHANDLER=1 \
     PYTHONIOENCODING=utf-8 \
     LANG=C.UTF-8
 
-ARG PY_SHORT_VERSION=3.11
+ARG PY_SHORT_VERSION=3.12
 
 FROM base AS builder
-RUN apt-get update
-RUN apt-get install -y gcc gdal-bin g++ libgdal-dev python3-gdal
+
+WORKDIR /
+RUN apt-get update && \
+    apt-get install -y gcc gdal-bin g++ libgdal-dev python3-gdal
 RUN pip install --upgrade pip
 
-COPY Pipfile.lock ./
-COPY Pipfile ./
+COPY pyproject.toml uv.lock ./
 
-RUN pip install pipenv
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
+RUN pip install uv
+RUN uv sync
 
 FROM base AS runtime
 
-COPY --from=builder /.venv /.venv
+ENV PYTHONPATH="/app"
 ENV PATH="/.venv/bin:$PATH"
+
+COPY --from=builder /.venv /.venv
 
 RUN useradd --no-create-home appuser
 
 WORKDIR /app
+
 USER appuser
-ENV PYTHONPATH="/app"

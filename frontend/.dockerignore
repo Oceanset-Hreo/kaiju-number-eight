@@ -1,0 +1,6 @@
+Makefile
+Dockerfile
+.vscode
+.git
+.gitignore
+node_modules
